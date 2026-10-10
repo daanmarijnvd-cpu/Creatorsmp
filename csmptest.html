@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090c12">
+    <title>CreatorSMP | Streamoverzicht</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #090c12;
+            color: #f4f6fb;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            --muted: #929bad;
+            --line: rgba(148, 163, 184, .13);
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse at 50% -20%, rgba(119, 32, 51, .2), transparent 48%), #090c12; }
+        button, input { font: inherit; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        a { color: inherit; text-decoration: none; }
+        .shell { width: min(1480px, 100% - 48px); margin: 0 auto; }
+
+        .topbar { border-bottom: 1px solid var(--line); background: rgba(9, 12, 18, .82); }
+        .topbar-inner { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .topbar-tools { display: flex; align-items: center; gap: 9px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: linear-gradient(145deg, #fb4560, #c51e42); box-shadow: 0 8px 28px rgba(251, 69, 96, .22); font-size: 20px; }
+        .brand-name { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.025em; }
+        .brand-caption { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+        .top-label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; color: #c7ceda; font-size: 11px; font-weight: 650; }
+        .stop-server-button { min-height: 34px; padding: 0 12px; border: 1px solid rgba(251, 69, 96, .3); border-radius: 9px; background: rgba(251, 69, 96, .09); color: #ff9aa8; font-size: 10px; font-weight: 750; cursor: pointer; }
+        .stop-server-button:hover { border-color: rgba(251, 69, 96, .55); background: rgba(251, 69, 96, .16); }
+        .stop-server-button:disabled { cursor: wait; opacity: .65; }
+        .server-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #f25068; box-shadow: 0 0 12px rgba(242, 80, 104, .7); }
+
+        main { padding: 34px 0 48px; }
+        .intro { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+        .eyebrow { margin: 0 0 8px; color: #ff8193; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+        h1 { margin: 0; font-size: clamp(27px, 4vw, 38px); line-height: 1.12; letter-spacing: -.045em; }
+        .intro-copy { max-width: 560px; margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+        .channel-count { flex: 0 0 auto; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; color: #cbd2dd; background: rgba(255, 255, 255, .025); font-size: 11px; font-weight: 700; }
+        .channel-stats { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; }
+        .viewer-total { padding: 9px 12px; border: 1px solid rgba(154, 131, 255, .2); border-radius: 12px; color: #c7baff; background: rgba(154, 131, 255, .06); font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+        .notice { display: flex; gap: 11px; align-items: flex-start; margin-bottom: 20px; padding: 13px 15px; border: 1px solid rgba(244, 185, 91, .2); border-radius: 13px; background: rgba(244, 185, 91, .055); color: #dbc9a7; font-size: 11px; line-height: 1.55; }
+        .notice-icon { flex: 0 0 auto; color: #f4b95b; font-size: 15px; }
+        .notice strong { color: #f2d8a9; }
+
+        .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+        .section-title { display: flex; align-items: center; gap: 9px; margin: 0; color: #e8ebf1; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .section-title .status-dot { width: 6px; height: 6px; background: #9a83ff; box-shadow: none; }
+        .toolbar-actions { display: flex; align-items: center; gap: 9px; }
+        .sort-select { min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 10px; background: #10151e; color: #dfe4ed; font-size: 11px; }
+        .filter-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin: 2px 0 14px; }
+        .filter-label { margin-right: 3px; color: #8993a4; font-size: 10px; font-weight: 700; }
+        .district-button { min-height: 29px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: #10151e; color: #aeb7c6; font-size: 10px; font-weight: 750; cursor: pointer; transition: background .16s, border-color .16s, color .16s; }
+        .district-button:hover { border-color: rgba(203, 213, 225, .28); color: #f3f5f9; }
+        .district-button[aria-pressed="true"] { border-color: rgba(154, 131, 255, .38); background: rgba(154, 131, 255, .11); color: #c7baff; }
+        .search { width: 190px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; outline: none; background: #10151e; color: #f4f6fb; font-size: 11px; }
+        .search::placeholder { color: #778194; }
+        .search:focus { border-color: rgba(251, 69, 96, .65); box-shadow: 0 0 0 3px rgba(251, 69, 96, .1); }
+        .view-button, .focus-button, .twitch-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); border-radius: 9px; color: #dfe4ed; background: #171d28; font-size: 10px; font-weight: 750; transition: background .16s, border-color .16s, transform .16s; }
+        .view-button { min-height: 34px; padding: 0 12px; }
+        .view-button:hover, .focus-button:hover, .twitch-link:hover { border-color: rgba(255, 255, 255, .22); background: #202837; }
+        .view-button:active, .focus-button:active, .twitch-link:active { transform: translateY(1px); }
+        .view-button.primary { border-color: rgba(251, 69, 96, .35); background: rgba(251, 69, 96, .1); color: #ff9aa8; }
+        .favorite-button { display: grid; flex: 0 0 auto; place-items: center; width: 27px; height: 27px; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #8791a2; font-size: 16px; line-height: 1; cursor: pointer; }
+        .favorite-button:hover, .favorite-button[aria-pressed="true"] { color: #f7d778; }
+        .favorite-button:focus-visible { outline: 2px solid #9a83ff; outline-offset: 2px; }
+
+        .stream-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+        .stream-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(155deg, #131a25, #0e131b 76%); box-shadow: 0 8px 22px rgba(0, 0, 0, .14); transition: border-color .18s, box-shadow .18s, transform .18s; }
+        .stream-card:hover { transform: translateY(-2px); border-color: rgba(203, 213, 225, .27); box-shadow: 0 15px 34px rgba(0, 0, 0, .23); }
+        .stream-card.active { border-color: rgba(251, 69, 96, .65); box-shadow: 0 0 0 1px rgba(251, 69, 96, .12), 0 12px 30px rgba(0, 0, 0, .2); }
+        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 10px 12px; }
+        .card-head-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+        .viewer-count { padding: 5px 7px; border: 1px solid rgba(148, 163, 184, .13); border-radius: 7px; color: #b6c0d0; font-size: 9px; font-weight: 700; white-space: nowrap; }
+        .viewer-count::before { content: "◉ "; color: #8994a8; }
+        .stream-card[data-status="offline"] .viewer-count { display: none; }
+        .creator { display: flex; min-width: 0; align-items: center; gap: 10px; }
+        .avatar { display: grid; flex: 0 0 auto; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(145deg, var(--accent), #19202c); color: white; font-size: 10px; font-weight: 850; }
+        .creator-name { overflow: hidden; margin: 0; color: #f3f5f9; font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+        .creator-handle { margin: 3px 0 0; color: #818b9d; font-size: 10px; }
+        .active-label { display: none; flex: 0 0 auto; align-items: center; gap: 6px; color: #ff8293; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+        .stream-card.active .active-label { display: inline-flex; }
+        .video { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #05070b; }
+        .video iframe { display: block; width: 100%; height: 100%; border: 0; }
+        .video .player-frame { position: absolute; inset: 0; }
+        .live-preview { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .stream-status { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; color: #919bad; font-size: 9px; font-weight: 750; }
+        .stream-status .status-dot { width: 6px; height: 6px; background: #8b95a6; box-shadow: none; }
+        .stream-status.live { color: #ff8293; }
+        .stream-status.live .status-dot { background: #f25068; box-shadow: 0 0 9px rgba(242, 80, 104, .65); }
+        .stream-status.offline .status-dot { background: #6d7788; }
+        .stream-status.unknown { color: #e0b56d; }
+        .stream-status.unknown .status-dot { background: #e0b56d; }
+        .video-placeholder { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: radial-gradient(ellipse at 50% 110%, color-mix(in srgb, var(--accent) 19%, transparent), transparent 62%), #090d14; text-align: center; }
+        .placeholder-content { max-width: 250px; }
+        .play-mark { display: grid; place-items: center; width: 42px; height: 42px; margin: 0 auto 10px; padding: 0; border: 1px solid rgba(255, 255, 255, .15); border-radius: 50%; background: rgba(255, 255, 255, .07); color: white; font-size: 15px; cursor: pointer; }
+        .play-mark:disabled { cursor: not-allowed; opacity: .5; }
+        .play-mark:not(:disabled):hover { border-color: rgba(255, 255, 255, .4); background: rgba(255, 255, 255, .13); }
+        .play-mark:focus-visible { outline: 2px solid #9a83ff; outline-offset: 3px; }
+        .placeholder-title { margin: 0; color: #dce2ec; font-size: 11px; font-weight: 700; }
+        .placeholder-copy { margin: 5px 0 0; color: #8893a6; font-size: 10px; line-height: 1.5; }
+        .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-top: 1px solid rgba(148, 163, 184, .09); }
+        .watch-note { overflow: hidden; color: #7f899b; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+        .focus-button, .twitch-link { min-height: 29px; padding: 0 9px; white-space: nowrap; }
+        .focus-button { border-color: rgba(251, 69, 96, .24); background: rgba(251, 69, 96, .09); color: #ff98a5; }
+        .focus-button:disabled { cursor: not-allowed; opacity: .45; }
+        .twitch-link { color: #c9d0dc; }
+        .empty-state { display: none; grid-column: 1 / -1; padding: 35px 16px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; font-size: 12px; }
+        .stream-grid.focus-mode { grid-template-columns: minmax(0, 1fr); max-width: 980px; margin: 0 auto; }
+        .stream-grid.focus-mode .stream-card:not(.focused) { display: none; }
+        .stream-grid.focus-mode .stream-card.focused { border-color: rgba(251, 69, 96, .65); }
+        .stream-grid.focus-mode .creator-name { font-size: 14px; }
+        .stream-grid.focus-mode .video-placeholder { background-size: cover; }
+        .toolbar.focus-mode .section-title { display: none; }
+        .intro.focus-mode, .notice.focus-mode, .footer-note.focus-mode { display: none; }
+        .footer-note { margin: 15px 0 0; color: #6f798b; font-size: 10px; line-height: 1.6; text-align: center; }
+        [hidden] { display: none !important; }
+
+        @media (max-width: 1050px) { .stream-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 640px) {
+            .shell { width: min(100% - 28px, 480px); }
+            .topbar-inner { min-height: 68px; }
+            .top-label { padding: 7px 9px; font-size: 10px; }
+            main { padding: 26px 0 34px; }
+            .intro { align-items: flex-start; flex-direction: column; gap: 13px; }
+            .channel-count { align-self: flex-start; }
+            .channel-stats { flex-wrap: wrap; }
+            .toolbar { align-items: stretch; flex-direction: column; }
+            .toolbar-actions { width: 100%; flex-wrap: wrap; }
+            .search { flex: 1 0 100%; width: 100%; min-width: 0; }
+            .sort-select { flex: 1 1 135px; min-width: 0; }
+            .stream-grid, .stream-grid.focus-mode { grid-template-columns: minmax(0, 1fr); }
+            .card-foot { padding: 9px 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="shell topbar-inner">
+            <a class="brand" href="#" aria-label="CreatorSMP streamoverzicht">
+                <span class="brand-mark" aria-hidden="true">⚡</span>
+                <span>
+                    <span class="brand-name">CreatorSMP</span>
+                    <span class="brand-caption">Streamoverzicht</span>
+                </span>
+            </a>
+            <div class="topbar-tools">
+                <span class="top-label"><span class="status-dot" aria-hidden="true"></span> Twitch-kanalen</span>
+                <button class="stop-server-button" id="stopServerButton" type="button">Server stoppen</button>
+                <span class="server-status" id="serverStatus" aria-live="polite"></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="intro" aria-labelledby="page-title">
+            <div>
+                <p class="eyebrow">Alles op één plek</p>
+                <h1 id="page-title">Kijk live mee</h1>
+                <p class="intro-copy">Bekijk de streams hieronder. Gebruik <strong>Focus</strong> voor een groter beeld of open een kanaal rechtstreeks op Twitch.</p>
+            </div>
+            <div class="channel-stats">
+                <div class="channel-count" id="channelCount">6 kanalen</div>
+                <div class="viewer-total" id="viewerTotal" aria-live="polite">Totaal kijkers ophalen…</div>
+            </div>
+        </section>
+
+        <aside class="notice" id="embedNotice">
+            <span class="notice-icon" aria-hidden="true">ⓘ</span>
+            <span><strong>Streams worden eerst gecontroleerd.</strong> Offline kanalen blijven compact en krijgen geen Twitch-speler. Alleen live streams tonen een voorbeeld; met <strong>Bekijk live</strong> open je de speler.</span>
+        </aside>
+
+        <section aria-labelledby="channels-title">
+            <div class="toolbar">
+                <h2 class="section-title" id="channels-title"><span class="status-dot" aria-hidden="true"></span> Streams</h2>
+                <div class="toolbar-actions">
+                    <label class="sr-only" for="channelSearch" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Zoek een kanaal</label>
+                    <input class="search" id="channelSearch" type="search" placeholder="Zoek een creator…" autocomplete="off">
+                    <label class="sr-only" for="sortOrder" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Sorteer streams</label>
+                    <select class="sort-select" id="sortOrder" aria-label="Sorteer streams">
+                        <option value="viewers">Kijkers: hoog naar laag</option>
+                        <option value="name">Naam</option>
+                    </select>
+                    <button class="view-button" id="liveOnlyButton" type="button" aria-pressed="false">Alleen live</button>
+                    <button class="view-button" id="favoritesButton" type="button" aria-pressed="false">☆ Favorieten</button>
+                    <button class="view-button" id="allStreamsButton" type="button" aria-pressed="true">Alle streams</button>
+                </div>
+            </div>
+            <div class="filter-row" role="group" aria-label="Filter op district">
+                <span class="filter-label">District</span>
+                <button class="district-button" type="button" data-district="Alle" aria-pressed="true">Alle</button>
+                <button class="district-button" type="button" data-district="Noord" aria-pressed="false">Noord</button>
+                <button class="district-button" type="button" data-district="Zuid" aria-pressed="false">Zuid</button>
+            </div>
+
+            <div class="stream-grid" id="streamGrid" aria-live="polite"></div>
+            <p class="empty-state" id="emptyState">Geen creator gevonden. Probeer een andere naam.</p>
+            <p class="footer-note">De officiële deelnemerslijst voor seizoen 4 bevat 90 spelers, geen 100. <a href="https://creatorsmp.nl/spelers" target="_blank" rel="noopener noreferrer" style="color:#aab4c5;text-decoration:underline;">Bekijk de deelnemerslijst</a>. Kijkersaantallen komen van DecAPI en kunnen tijdelijk ontbreken door limieten; bekende aantallen worden automatisch van hoog naar laag gesorteerd.</p>
+        </section>
+    </main>
+
+    <script>
+        const favoriteStorageKey = "creatorsmp-favorites";
+        const viewerCacheStorageKey = "creatorsmp-viewer-counts";
+        const viewerCacheTtl = 60 * 1000;
+        function readViewerCache() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(viewerCacheStorageKey) || "{}");
+                if (!saved || typeof saved !== "object" || Array.isArray(saved)) return new Map();
+                return new Map(Object.entries(saved).filter(([, entry]) =>
+                    entry
+                    && Number.isInteger(entry.count)
+                    && entry.count >= 0
+                    && Number.isFinite(entry.updatedAt)
+                ));
+            } catch (error) {
+                console.error("Opgeslagen kijkersaantallen konden niet worden gelezen:", error);
+                return new Map();
+            }
+        }
+        const viewerCache = readViewerCache();
+        function readFavorites() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(favoriteStorageKey) || "[]");
+                return new Set(Array.isArray(saved) ? saved.filter(item => typeof item === "string") : []);
+            } catch (error) {
+                console.error("Opgeslagen favorieten konden niet worden gelezen:", error);
+                return new Set();
+            }
+        }
+        const favorites = readFavorites();
+        const creators = [
+            ["Acid", "acidtwee"], ["AkaLuuk", "akkaluuk"], ["Alex Klein", "alexkleinyt"],
+            ["alissarella", "alissarella"], ["AltijdMelvin", "altijdmelvin"], ["AwesomeDad", "awesomedad"],
+            ["AYV3E", "ayv3e"], ["BardoEllens", "bardo"], ["Bassistentje", "bassistentje"],
+            ["Bintjeeeh", "bintjeeeh"], ["Bokado", "bokado"], ["Brolsen", "brolsen"],
+            ["Chatmo", "chatmo"], ["ClownPierce", "clownpiercenl"], ["Dante", "clonnylive"],
+            ["DavincstyleGames", "davincstylegames"], ["Deem", "deem"], ["Dennus", "dennusyt"],
+            ["DionTVG", "diontvg"], ["DonKaaklijn", "donkaaklijn"], ["Duncan", "duncan"],
+            ["eenhoorntamara", "eenhoorntamara"], ["egbertlive", "egbertlive"], ["Enzo Knol", "enzoknol"],
+            ["Faynominaal", "faynominaal"], ["Fems", "fems"], ["GameMeneer", "gamemeneer"],
+            ["GeorgeFaralley", "georgefaralley"], ["Gio Latooy", "giolatooylive"], ["HARM", "harm_live"],
+            ["Idris", "idris"], ["Igortjuh", "igortjuh"], ["Imkefleur", "imkefleur"],
+            ["Its_Ankie", "its_ankie"], ["Javieros", "javieros"], ["Jelly", "jellyyt"],
+            ["Jeremy Frieser", "jeremyfrieser"], ["Job Dutchtuber", "dutchtuberlive"], ["JPAIR", "jpair"],
+            ["kantje", "kantje"], ["KingKontent", "kingkontent"], ["Laagvliet", "laagvliet"],
+            ["LinkTijger", "linktijger"], ["Loony", "loony_mc"], ["Lotje", "lotje"],
+            ["MaicoBeukers", "maicobeukers"], ["Manon", "manon"], ["MaysieLive", "maysielive"],
+            ["Merretje", "merretje"], ["Mick", "mickvantwitch"], ["Mokka", "mokka"],
+            ["Morrog", "morrog"], ["NatVlees", "natvlees"], ["NoaNoella", "noanoella"],
+            ["Noël Dekkers", "noeldekkers"], ["NoVertigo", "novertigo"], ["OmaScheetReet", "omascheetreet"],
+            ["Pangi", "pangi"], ["papaneus", "papaneus"], ["Paraduze", "paraduze"],
+            ["Pascal", "scherpenkate"], ["Puddingb00m", "puddingb00m"], ["PuqLive", "puqlive"],
+            ["Puxque", "puxque"], ["Qucee", "qucee"], ["Roedie", "roedie"],
+            ["Ronald", "ronald"], ["Royalistiq", "royalistiq"], ["SanDramatis", "sandramatis"],
+            ["Santino_YT", "santino0_yt"], ["sejecem", "sejecem"], ["Shandrea", "shandrea"],
+            ["Shappo0", "shappo0"], ["SlushieVRC", "slushievrc"], ["spacingunicorn", "spacingunicorn"],
+            ["StreamwithLien", "streamwithlien"], ["Vince_STICK", "vince_stick"], ["Weswoes", "weswoes"],
+            ["Wolfeei", "wolfeei"], ["Yarasky", "yaraskygaming"], ["APPELKAAS", "appelkaas"],
+            ["henRYANand", "henryanand"], ["BellieTV", "bellietv"], ["Ezra", "ezra"],
+            ["ikbenwela", "ikbenwela"], ["jactha", "jactha"], ["QuintenVms", "quintenvms"],
+            ["Izza", "izza"], ["Ljoeb", "ljoeb"], ["MarnixWesthuis", "marnixwesthuis"]
+        ].map(([name, twitch], index) => ({
+            name,
+            twitch,
+            district: null,
+            color: `hsl(${Math.round(index * 137.508) % 360} 65% 52%)`
+        }));
+
+        const northPlayers = new Set([
+            "Acid", "AkaLuuk", "APPELKAAS", "Bokado", "Brolsen", "ClownPierce", "Dante", "Deem",
+            "DionTVG", "DonKaaklijn", "eenhoorntamara", "egbertlive", "Ezra", "Faynominaal",
+            "Gio Latooy", "HARM", "Imkefleur", "Its_Ankie", "Izza", "jactha", "Javieros", "Jelly",
+            "Jeremy Frieser", "JPAIR", "Laagvliet", "Ljoeb", "Loony", "MaicoBeukers",
+            "MarnixWesthuis", "MaysieLive", "Merretje", "Mokka", "Morrog", "NatVlees", "NoaNoella",
+            "Noël Dekkers", "papaneus", "Paraduze", "PuqLive", "Puxque", "Qucee", "QuintenVms",
+            "Roedie", "Shandrea", "Weswoes"
+        ]);
+        const southPlayers = new Set([
+            "Alex Klein", "alissarella", "AltijdMelvin", "AwesomeDad", "AYV3E", "BardoEllens",
+            "Bassistentje", "BellieTV", "Bintjeeeh", "Chatmo", "DavincstyleGames", "Dennus", "Duncan",
+            "Enzo Knol", "Fems", "GameMeneer", "GeorgeFaralley", "henRYANand", "Idris", "Igortjuh",
+            "ikbenwela", "Job Dutchtuber", "kantje", "KingKontent", "LinkTijger", "Lotje", "Manon",
+            "Mick", "NoVertigo", "OmaScheetReet", "Pangi", "Pascal", "Puddingb00m", "Ronald",
+            "Royalistiq", "SanDramatis", "Santino_YT", "sejecem", "Shappo0", "SlushieVRC",
+            "spacingunicorn", "StreamwithLien", "Vince_STICK", "Wolfeei", "Yarasky"
+        ]);
+
+        creators.forEach(creator => {
+            if (northPlayers.has(creator.name)) creator.district = "Noord";
+            if (southPlayers.has(creator.name)) creator.district = "Zuid";
+        });
+
+        const streamGrid = document.getElementById("streamGrid");
+        const channelCount = document.getElementById("channelCount");
+        const searchInput = document.getElementById("channelSearch");
+        const stopServerButton = document.getElementById("stopServerButton");
+        const serverStatus = document.getElementById("serverStatus");
+        const allStreamsButton = document.getElementById("allStreamsButton");
+        const liveOnlyButton = document.getElementById("liveOnlyButton");
+        const favoritesButton = document.getElementById("favoritesButton");
+        const sortOrder = document.getElementById("sortOrder");
+        const toolbar = document.querySelector(".toolbar");
+        const districtRow = document.querySelector(".filter-row");
+        const intro = document.querySelector(".intro");
+        const notice = document.querySelector(".notice");
+        const footerNote = document.querySelector(".footer-note");
+        const emptyState = document.getElementById("emptyState");
+        let focusedCreator = null;
+        let liveOnly = false;
+        let favoritesOnly = false;
+        let districtFilter = "Alle";
+        let viewerRefreshRunning = false;
+        let statusCheckRunning = false;
+
+        function createStreamCard(creator) {
+            const card = document.createElement("article");
+            card.className = "stream-card";
+            card.dataset.channel = creator.twitch;
+            card.dataset.district = creator.district;
+            card.dataset.status = "checking";
+            card.style.setProperty("--accent", creator.color);
+
+            const heading = document.createElement("div");
+            heading.className = "card-head";
+
+            const identity = document.createElement("div");
+            identity.className = "creator";
+            const avatar = document.createElement("span");
+            avatar.className = "avatar";
+            avatar.setAttribute("aria-hidden", "true");
+            avatar.textContent = creator.name.slice(0, 2).toUpperCase();
+            const names = document.createElement("div");
+            const name = document.createElement("h3");
+            name.className = "creator-name";
+            name.textContent = creator.name;
+            const handle = document.createElement("p");
+            handle.className = "creator-handle";
+            handle.textContent = `${creator.district} · twitch.tv/${creator.twitch}`;
+            names.append(name, handle);
+            identity.append(avatar, names);
+
+            const status = document.createElement("span");
+            status.className = "stream-status";
+            status.innerHTML = '<span class="status-dot" aria-hidden="true"></span> Controleren';
+            const favoriteButton = document.createElement("button");
+            favoriteButton.className = "favorite-button";
+            favoriteButton.type = "button";
+            favoriteButton.setAttribute("aria-pressed", String(favorites.has(creator.twitch)));
+            favoriteButton.setAttribute("aria-label", `${favorites.has(creator.twitch) ? "Verwijder uit" : "Voeg toe aan"} favorieten: ${creator.name}`);
+            favoriteButton.title = favoriteButton.getAttribute("aria-label");
+            favoriteButton.textContent = favorites.has(creator.twitch) ? "★" : "☆";
+            favoriteButton.addEventListener("click", () => toggleFavorite(creator, card));
+            const viewerCount = document.createElement("span");
+            viewerCount.className = "viewer-count";
+            viewerCount.textContent = "Kijkers ophalen…";
+            const headActions = document.createElement("div");
+            headActions.className = "card-head-actions";
+            headActions.append(viewerCount, status, favoriteButton);
+            heading.append(identity, headActions);
+
+            const video = document.createElement("div");
+            video.className = "video";
+            const placeholder = document.createElement("div");
+            placeholder.className = "video-placeholder";
+            const placeholderContent = document.createElement("div");
+            placeholderContent.className = "placeholder-content";
+            const play = document.createElement("button");
+            play.className = "play-mark";
+            play.type = "button";
+            play.disabled = true;
+            play.setAttribute("aria-label", `Bekijk de live stream van ${creator.name}`);
+            play.textContent = "▶";
+            const placeholderTitle = document.createElement("p");
+            placeholderTitle.className = "placeholder-title";
+            placeholderTitle.textContent = `Stream van ${creator.name}`;
+            const placeholderCopy = document.createElement("p");
+            placeholderCopy.className = "placeholder-copy";
+            placeholderCopy.textContent = "Live-status wordt gecontroleerd.";
+            placeholderContent.append(play, placeholderTitle, placeholderCopy);
+            placeholder.append(placeholderContent);
+            video.append(placeholder);
+
+            const footer = document.createElement("div");
+            footer.className = "card-foot";
+            const note = document.createElement("span");
+            note.className = "watch-note";
+            note.textContent = "Live-status controleren…";
+
+            const actions = document.createElement("div");
+            actions.style.cssText = "display:flex;gap:7px;align-items:center;";
+            const focusButton = document.createElement("button");
+            focusButton.className = "focus-button";
+            focusButton.type = "button";
+            focusButton.textContent = "Laden…";
+            focusButton.disabled = true;
+            focusButton.setAttribute("aria-label", `Bekijk de live stream van ${creator.name}`);
+            focusButton.setAttribute("aria-pressed", "false");
+            focusButton.addEventListener("click", () => {
+                if (focusedCreator?.twitch === creator.twitch) {
+                    showAllStreams();
+                } else {
+                    focusStream(creator, card);
+                }
+            });
+            play.addEventListener("click", () => focusStream(creator, card));
+
+            const twitchLink = document.createElement("a");
+            twitchLink.className = "twitch-link";
+            twitchLink.href = `https://www.twitch.tv/${encodeURIComponent(creator.twitch)}`;
+            twitchLink.textContent = "Open Twitch ↗";
+            twitchLink.hidden = true;
+            actions.append(focusButton, twitchLink);
+            footer.append(note, actions);
+            card.append(heading, video, footer);
+            card.streamElements = { status, viewerCount, favoriteButton, video, placeholder, placeholderTitle, placeholderCopy, note, focusButton, twitchLink };
+            return card;
+        }
+
+        function toggleFavorite(creator, card) {
+            if (favorites.has(creator.twitch)) {
+                favorites.delete(creator.twitch);
+            } else {
+                favorites.add(creator.twitch);
+            }
+
+            const isFavorite = favorites.has(creator.twitch);
+            const { favoriteButton } = card.streamElements;
+            favoriteButton.textContent = isFavorite ? "★" : "☆";
+            favoriteButton.setAttribute("aria-pressed", String(isFavorite));
+            favoriteButton.setAttribute("aria-label", `${isFavorite ? "Verwijder uit" : "Voeg toe aan"} favorieten: ${creator.name}`);
+            favoriteButton.title = favoriteButton.getAttribute("aria-label");
+            try {
+                localStorage.setItem(favoriteStorageKey, JSON.stringify([...favorites]));
+            } catch (error) {
+                console.error("Favorieten konden niet worden opgeslagen:", error);
+                serverStatus.textContent = "Favorieten konden niet lokaal worden opgeslagen.";
+            }
+            filterStreams();
+        }
+
+        async function checkCreatorStatus(creator, card) {
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), 12000);
+            try {
+                const cacheBuster = `check=${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                const url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${encodeURIComponent(creator.twitch)}-320x180.jpg?${cacheBuster}`;
+                const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+                if (!response.ok) throw new Error(`Twitch preview gaf HTTP ${response.status}`);
+
+                const isOfflinePlaceholder = response.url.includes("/ttv-static/404_preview-320x180.jpg");
+                if (isOfflinePlaceholder) {
+                    setCreatorStatus(creator, card, "offline");
+                    return;
+                }
+                if (!response.headers.get("content-type")?.startsWith("image/")) {
+                    throw new Error("Twitch preview gaf geen afbeelding terug");
+                }
+
+                const previewUrl = URL.createObjectURL(await response.blob());
+                setCreatorStatus(creator, card, "live", previewUrl);
+            } catch (error) {
+                console.error(`Live-status controleren voor ${creator.twitch} is mislukt:`, error);
+                setCreatorStatus(creator, card, "unknown");
+            } finally {
+                window.clearTimeout(timeoutId);
+            }
+        }
+
+        function setCreatorStatus(creator, card, state, previewUrl = null) {
+            if (state !== "live" && focusedCreator?.twitch === creator.twitch) {
+                showAllStreams();
+            }
+            const lastViewerCheck = Number(card.dataset.viewersUpdated || 0);
+            const { status, viewerCount, video, placeholder, placeholderTitle, placeholderCopy, note, focusButton, twitchLink } = card.streamElements;
+            card.dataset.status = state;
+            status.className = `stream-status ${state}`;
+
+            const previousPreview = card.dataset.previewUrl;
+            if (previousPreview) URL.revokeObjectURL(previousPreview);
+            card.querySelector(".live-preview")?.remove();
+            card.dataset.previewUrl = "";
+
+            if (state === "live") {
+                const cachedCount = viewerCache.get(creator.twitch);
+                if (cachedCount) {
+                    card.dataset.viewers = String(cachedCount.count);
+                    card.dataset.viewersUpdated = String(Math.max(cachedCount.updatedAt, lastViewerCheck));
+                    const isStale = Date.now() - cachedCount.updatedAt >= viewerCacheTtl;
+                    viewerCount.textContent = `${isStale ? "≈ " : ""}${cachedCount.count.toLocaleString("nl-NL")} kijkers`;
+                    viewerCount.title = `Laatst opgehaald ${new Date(cachedCount.updatedAt).toLocaleString("nl-NL")}; wordt automatisch bijgewerkt`;
+                } else {
+                    card.dataset.viewers = "";
+                    card.dataset.viewersUpdated = "";
+                    viewerCount.textContent = "Kijkers ophalen…";
+                }
+                card.dataset.previewUrl = previewUrl;
+                const preview = document.createElement("img");
+                preview.className = "live-preview";
+                preview.src = previewUrl;
+                preview.alt = `Live preview van ${creator.name}`;
+                preview.loading = "lazy";
+                preview.hidden = Boolean(card.querySelector(".player-frame"));
+                video.insertBefore(preview, placeholder);
+                placeholder.hidden = Boolean(card.querySelector(".player-frame"));
+                status.innerHTML = '<span class="status-dot" aria-hidden="true"></span> Live';
+                placeholderTitle.textContent = `${creator.name} is live`;
+                placeholderCopy.textContent = "Klik op de afspeelknop om de stream af te spelen.";
+                note.textContent = "Live op Twitch";
+                focusButton.disabled = false;
+                focusButton.textContent = "Bekijk live";
+                placeholder.querySelector(".play-mark").disabled = false;
+                twitchLink.hidden = false;
+            } else if (state === "offline") {
+                card.dataset.viewers = "";
+                card.dataset.viewersUpdated = "";
+                viewerCount.textContent = "";
+                placeholder.hidden = false;
+                placeholderTitle.textContent = `${creator.name} is offline`;
+                placeholderCopy.textContent = "De Twitch-speler blijft verborgen zolang deze creator offline is.";
+                status.innerHTML = '<span class="status-dot" aria-hidden="true"></span> Offline';
+                note.textContent = "Geen livestream";
+                focusButton.disabled = true;
+                focusButton.textContent = "Offline";
+                placeholder.querySelector(".play-mark").disabled = true;
+                twitchLink.hidden = true;
+            } else {
+                card.dataset.viewers = "";
+                card.dataset.viewersUpdated = "";
+                viewerCount.textContent = "Kijkersaantal onbekend";
+                placeholder.hidden = false;
+                placeholderTitle.textContent = "Live-status niet beschikbaar";
+                placeholderCopy.textContent = "Controleer je verbinding of open Twitch om het kanaal te bekijken.";
+                status.innerHTML = '<span class="status-dot" aria-hidden="true"></span> Onbekend';
+                note.textContent = "Status controleren mislukt";
+                focusButton.disabled = true;
+                focusButton.textContent = "Niet beschikbaar";
+                placeholder.querySelector(".play-mark").disabled = true;
+                twitchLink.hidden = false;
+            }
+            updateTotalViewerCount();
+            sortCards();
+            filterStreams();
+        }
+
+        function sortCards() {
+            if (focusedCreator) return;
+            const cards = [...streamGrid.querySelectorAll(".stream-card")];
+            cards.sort((first, second) => {
+                const firstName = first.querySelector(".creator-name").textContent;
+                const secondName = second.querySelector(".creator-name").textContent;
+                if (sortOrder.value === "name") return firstName.localeCompare(secondName, "nl");
+
+                const firstLive = first.dataset.status === "live";
+                const secondLive = second.dataset.status === "live";
+                if (firstLive !== secondLive) return firstLive ? -1 : 1;
+                const firstKnown = first.dataset.viewers !== "" && Number.isFinite(Number(first.dataset.viewers));
+                const secondKnown = second.dataset.viewers !== "" && Number.isFinite(Number(second.dataset.viewers));
+                if (firstKnown !== secondKnown) return firstKnown ? -1 : 1;
+                if (firstKnown && secondKnown) {
+                    const countDifference = Number(second.dataset.viewers) - Number(first.dataset.viewers);
+                    if (countDifference) return countDifference;
+                }
+                return firstName.localeCompare(secondName, "nl");
+            });
+            const currentOrder = [...streamGrid.children];
+            if (cards.every((card, index) => card === currentOrder[index])) return;
+            cards.forEach(card => streamGrid.append(card));
+        }
+
+        function updateViewerCount(card, value, message = "") {
+            if (card.dataset.status !== "live") return;
+            const { viewerCount } = card.streamElements;
+            if (Number.isInteger(value) && value >= 0) {
+                const updatedAt = Date.now();
+                card.dataset.viewers = String(value);
+                card.dataset.viewersUpdated = String(updatedAt);
+                viewerCount.textContent = `${value.toLocaleString("nl-NL")} kijkers`;
+                viewerCount.title = `Laatst opgehaald ${new Date(updatedAt).toLocaleString("nl-NL")}`;
+                viewerCache.set(card.dataset.channel, { count: value, updatedAt });
+                try {
+                    localStorage.setItem(viewerCacheStorageKey, JSON.stringify(Object.fromEntries(viewerCache)));
+                } catch (error) {
+                    console.error("Kijkersaantallen konden niet lokaal worden opgeslagen:", error);
+                }
+            } else {
+                card.dataset.viewersUpdated = String(Date.now());
+                if (card.dataset.viewers !== "") {
+                    viewerCount.textContent = `≈ ${Number(card.dataset.viewers).toLocaleString("nl-NL")} kijkers`;
+                    viewerCount.title = message || "Tijdelijk niet vernieuwd; dit is het laatst opgeslagen aantal";
+                } else {
+                    viewerCount.textContent = message || "Kijkersaantal onbekend";
+                    viewerCount.title = "Het kijkersaantal is tijdelijk niet beschikbaar";
+                }
+            }
+            updateTotalViewerCount();
+            sortCards();
+        }
+
+        function updateTotalViewerCount() {
+            const liveCards = [...streamGrid.querySelectorAll('.stream-card[data-status="live"]')];
+            const knownCounts = liveCards
+                .filter(card => card.dataset.viewers !== "" && Number.isInteger(Number(card.dataset.viewers)))
+                .map(card => Number(card.dataset.viewers));
+            const total = knownCounts.reduce((sum, count) => sum + count, 0);
+            const liveTotal = liveCards.length;
+            const totalLabel = document.getElementById("viewerTotal");
+
+            if (liveTotal === 0) {
+                totalLabel.textContent = "Geen live kijkers";
+            } else if (knownCounts.length === liveTotal) {
+                totalLabel.textContent = `Totaal ${total.toLocaleString("nl-NL")} kijkers`;
+            } else if (knownCounts.length > 0) {
+                totalLabel.textContent = `${total.toLocaleString("nl-NL")} kijkers · ${knownCounts.length}/${liveTotal} streams`;
+            } else {
+                totalLabel.textContent = `Totaal ophalen… · 0/${liveTotal} streams`;
+            }
+        }
+
+        async function refreshViewerCounts() {
+            if (viewerRefreshRunning || window.location.protocol === "file:") return;
+            viewerRefreshRunning = true;
+            try {
+                const cards = [...streamGrid.querySelectorAll('.stream-card[data-status="live"]')];
+                let requestedCount = 0;
+                for (const card of cards) {
+                    const lastUpdated = Number(card.dataset.viewersUpdated || 0);
+                    if (Date.now() - lastUpdated < viewerCacheTtl) continue;
+                    if (requestedCount > 0) await new Promise(resolve => window.setTimeout(resolve, 1200));
+                    requestedCount++;
+                    if (card.dataset.status !== "live") continue;
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+                        let response;
+                        try {
+                            response = await fetch(
+                                `https://decapi.me/twitch/viewercount/${encodeURIComponent(card.dataset.channel)}`,
+                                { cache: "no-store", signal: controller.signal }
+                            );
+                        } finally {
+                            window.clearTimeout(timeoutId);
+                        }
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const result = (await response.text()).trim();
+                        if (/^\d[\d,]*$/.test(result)) {
+                            updateViewerCount(card, Number(result.replace(/,/g, "")));
+                        } else if (/429|too many requests/i.test(result)) {
+                            updateViewerCount(card, null, "Kijkersaantal tijdelijk beperkt");
+                        } else {
+                            updateViewerCount(card, null);
+                        }
+                    } catch (error) {
+                        updateViewerCount(card, null);
+                        console.error(`Kijkersaantal ophalen voor ${card.dataset.channel} is mislukt:`, error);
+                    }
+                }
+            } finally {
+                viewerRefreshRunning = false;
+                updateTotalViewerCount();
+                sortCards();
+            }
+        }
+
+        async function checkAllCreators() {
+            if (window.location.protocol === "file:") {
+                creators.forEach(creator => {
+                    const card = streamGrid.querySelector(`[data-channel="${creator.twitch}"]`);
+                    setCreatorStatus(creator, card, "unknown");
+                });
+                return;
+            }
+            if (statusCheckRunning) return;
+            statusCheckRunning = true;
+            try {
+                const queue = creators.map(creator => ({
+                    creator,
+                    card: streamGrid.querySelector(`[data-channel="${creator.twitch}"]`)
+                }));
+                let nextIndex = 0;
+                const workers = Array.from({ length: 8 }, async () => {
+                    while (nextIndex < queue.length) {
+                        const item = queue[nextIndex++];
+                        await checkCreatorStatus(item.creator, item.card);
+                    }
+                });
+                await Promise.all(workers);
+                refreshViewerCounts();
+            } finally {
+                statusCheckRunning = false;
+            }
+        }
+
+        function focusStream(creator, selectedCard) {
+            if (selectedCard.dataset.status !== "live" || window.location.protocol === "file:") return;
+            streamGrid.querySelectorAll(".player-frame").forEach(frame => frame.remove());
+            streamGrid.querySelectorAll(".live-preview").forEach(preview => { preview.hidden = false; });
+
+            const playerUrl = new URL("https://player.twitch.tv/");
+            playerUrl.searchParams.set("channel", creator.twitch);
+            playerUrl.searchParams.set("parent", window.location.hostname);
+            playerUrl.searchParams.set("autoplay", "true");
+            playerUrl.searchParams.set("muted", "true");
+            const player = document.createElement("iframe");
+            player.className = "player-frame";
+            player.src = playerUrl.toString();
+            player.title = `Live stream van ${creator.name}`;
+            player.allow = "autoplay; fullscreen; picture-in-picture";
+            player.referrerPolicy = "origin";
+            selectedCard.streamElements.video.append(player);
+            selectedCard.querySelector(".live-preview").hidden = true;
+            selectedCard.streamElements.placeholder.hidden = true;
+            selectedCard.streamElements.focusButton.textContent = "← Terug naar streams";
+            selectedCard.streamElements.focusButton.setAttribute("aria-label", "Terug naar het streamoverzicht");
+            selectedCard.streamElements.twitchLink.textContent = "Probleem? Open Twitch ↗";
+
+            focusedCreator = creator;
+            streamGrid.classList.add("focus-mode");
+            allStreamsButton.classList.add("primary");
+            allStreamsButton.setAttribute("aria-pressed", "false");
+            streamGrid.querySelectorAll(".stream-card").forEach(card => {
+                card.classList.toggle("focused", card === selectedCard);
+                card.classList.toggle("active", card === selectedCard);
+                card.querySelector(".focus-button").setAttribute("aria-pressed", String(card === selectedCard));
+            });
+            allStreamsButton.textContent = "← Terug naar overzicht";
+            toolbar.classList.add("focus-mode");
+            intro.classList.add("focus-mode");
+            notice.classList.add("focus-mode");
+            footerNote.classList.add("focus-mode");
+            searchInput.hidden = true;
+            sortOrder.hidden = true;
+            liveOnlyButton.hidden = true;
+            favoritesButton.hidden = true;
+            districtRow.hidden = true;
+            filterStreams();
+            document.getElementById("channels-title").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function showAllStreams() {
+            focusedCreator = null;
+            streamGrid.querySelectorAll(".player-frame").forEach(frame => frame.remove());
+            streamGrid.querySelectorAll(".live-preview").forEach(preview => { preview.hidden = false; });
+            streamGrid.querySelectorAll(".stream-card").forEach(card => {
+                card.streamElements.placeholder.hidden = card.dataset.status === "live";
+                const state = card.dataset.status;
+                card.streamElements.focusButton.textContent = state === "live"
+                    ? "Bekijk live"
+                    : state === "offline" ? "Offline" : "Niet beschikbaar";
+                card.streamElements.focusButton.setAttribute("aria-label", `Bekijk de live stream van ${card.dataset.channel}`);
+                card.streamElements.twitchLink.textContent = "Open Twitch ↗";
+                card.querySelector(".focus-button").setAttribute("aria-pressed", "false");
+            });
+            streamGrid.classList.remove("focus-mode");
+            streamGrid.querySelectorAll(".stream-card").forEach(card => {
+                card.classList.remove("focused", "active");
+            });
+            allStreamsButton.classList.remove("primary");
+            allStreamsButton.setAttribute("aria-pressed", "true");
+            allStreamsButton.textContent = "Alle streams";
+            toolbar.classList.remove("focus-mode");
+            intro.classList.remove("focus-mode");
+            notice.classList.remove("focus-mode");
+            footerNote.classList.remove("focus-mode");
+            searchInput.hidden = false;
+            sortOrder.hidden = false;
+            liveOnlyButton.hidden = false;
+            favoritesButton.hidden = false;
+            districtRow.hidden = false;
+            sortCards();
+            filterStreams();
+        }
+
+        function filterStreams() {
+            const query = searchInput.value.trim().toLocaleLowerCase("nl");
+            let visibleCount = 0;
+            let matchingCount = 0;
+            let liveCount = 0;
+            streamGrid.querySelectorAll(".stream-card").forEach(card => {
+                const matches = card.dataset.channel.toLocaleLowerCase("nl").includes(query)
+                    || card.querySelector(".creator-name").textContent.toLocaleLowerCase("nl").includes(query)
+                    || card.dataset.district.toLocaleLowerCase("nl").includes(query);
+                const isLive = card.dataset.status === "live";
+                const isFavorite = favorites.has(card.dataset.channel);
+                if (matches) matchingCount++;
+                const visible = matches
+                    && (districtFilter === "Alle" || card.dataset.district === districtFilter)
+                    && (!liveOnly || isLive)
+                    && (!favoritesOnly || isFavorite)
+                    && (!focusedCreator || card.dataset.channel === focusedCreator.twitch);
+                card.hidden = !visible;
+                if (visible) {
+                    visibleCount++;
+                    if (isLive) liveCount++;
+                }
+            });
+            channelCount.textContent = focusedCreator
+                ? `${focusedCreator.name} · Live`
+                : query
+                    ? `${liveCount} live · ${matchingCount} resultaten`
+                    : `${liveCount} live · ${creators.length} spelers`;
+            emptyState.style.display = visibleCount ? "none" : "block";
+            emptyState.textContent = liveOnly
+                ? "Er zijn momenteel geen live streams gevonden."
+                : "Geen speler gevonden. Pas je zoekopdracht of districtfilter aan.";
+        }
+
+        creators.forEach(creator => streamGrid.append(createStreamCard(creator)));
+        searchInput.addEventListener("input", filterStreams);
+        sortOrder.addEventListener("change", sortCards);
+        allStreamsButton.addEventListener("click", showAllStreams);
+        liveOnlyButton.addEventListener("click", () => {
+            liveOnly = !liveOnly;
+            liveOnlyButton.classList.toggle("primary", liveOnly);
+            liveOnlyButton.setAttribute("aria-pressed", String(liveOnly));
+            filterStreams();
+        });
+        favoritesButton.addEventListener("click", () => {
+            favoritesOnly = !favoritesOnly;
+            favoritesButton.classList.toggle("primary", favoritesOnly);
+            favoritesButton.setAttribute("aria-pressed", String(favoritesOnly));
+            favoritesButton.textContent = favoritesOnly ? "★ Favorieten" : "☆ Favorieten";
+            filterStreams();
+        });
+        document.querySelectorAll(".district-button").forEach(button => {
+            button.addEventListener("click", () => {
+                districtFilter = button.dataset.district;
+                document.querySelectorAll(".district-button").forEach(option => {
+                    option.setAttribute("aria-pressed", String(option === button));
+                });
+                filterStreams();
+            });
+        });
+        stopServerButton.addEventListener("click", async () => {
+            if (!window.confirm("Weet je zeker dat je de CreatorSMP-server wilt stoppen?")) return;
+
+            stopServerButton.disabled = true;
+            stopServerButton.textContent = "Server stoppen…";
+            serverStatus.textContent = "De server wordt gestopt.";
+            try {
+                const response = await fetch("/shutdown", { method: "POST" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                stopServerButton.textContent = "Server gestopt";
+                serverStatus.textContent = "De server is gestopt. Je kunt dit tabblad sluiten.";
+            } catch (error) {
+                console.error("De CreatorSMP-server kon niet worden gestopt:", error);
+                stopServerButton.disabled = false;
+                stopServerButton.textContent = "Server stoppen";
+                serverStatus.textContent = "Server stoppen is mislukt. Sluit het servervenster handmatig.";
+            }
+        });
+        filterStreams();
+        if (window.location.protocol === "file:") {
+            document.querySelector("#embedNotice span:last-child").innerHTML =
+                "<strong>Open dit bestand via een lokale webserver.</strong> Twitch blokkeert live-status en spelers in een rechtstreeks geopend bestand (file://). Gebruik localhost of HTTPS en herlaad de pagina.";
+        }
+        checkAllCreators();
+        window.setInterval(checkAllCreators, 90000);
+        window.setInterval(refreshViewerCounts, 60000);
+    </script>
+</body>
+</html>
